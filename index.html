@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Advanced Speech to Text</title>
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#2c3e50" />
+    <style>
+      :root {
+        --primary-color: #9c27b0;
+        --secondary-color: #3498db;
+        --warning-color: #f39c12;
+        --success-color: #4caf50;
+        --danger-color: #e74c3c;
+        --dark-color: #2c3e50;
+        --light-color: #ecf0f1;
+      }
+
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f7fa;
+        color: #333;
+        touch-action: manipulation;
+      }
+
+      .container {
+        max-width: 100%;
+        margin: 0;
+        background: white;
+        padding: 15px;
+        min-height: 100vh;
+      }
+
+      h1 {
+        text-align: center;
+        color: var(--dark-color);
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+      }
+
+      .control-panel {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+        justify-content: center;
+      }
+
+      button {
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+        flex: 1 1 120px;
+        min-width: 0;
+        max-width: 200px;
+        touch-action: manipulation;
+      }
+
+      button:active {
+        transform: scale(0.98);
+      }
+
+      #toggleBtn {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      #addNoteBtn {
+        background-color: var(--secondary-color);
+        color: white;
+      }
+
+      #clearBtn {
+        background-color: var(--warning-color);
+        color: white;
+      }
+
+      #translateBtn {
+        background-color: var(--success-color);
+        color: white;
+      }
+
+      #exportBtn {
+        background-color: #2196f3;
+        color: white;
+      }
+
+      #importBtn {
+        background-color: #607d8b;
+        color: white;
+      }
+
+      #googleTranslateBtn {
+        background-color: #4285f4;
+        color: white;
+      }
+
+      #longRangeToggle {
+        background-color: #673ab7;
+        color: white;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      .status {
+        text-align: center;
+        margin: 12px 0;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: var(--light-color);
+        font-size: 0.9rem;
+      }
+
+      .transcript-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .text-display,
+      .notes-display {
+        width: 100%;
+        min-height: 150px;
+        padding: 12px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        font-size: 1rem;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .text-display {
+        font-size: 1rem;
+      }
+
+      .notes-display {
+        background-color: #fffde7;
+      }
+
+      .notes-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .note-item {
+        padding: 12px;
+        margin-bottom: 10px;
+        background-color: #fff9c4;
+        border-left: 4px solid #ffd600;
+        border-radius: 6px;
+        position: relative;
+        word-break: break-word;
+      }
+
+      .note-item .delete-note {
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        background: var(--danger-color);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+        line-height: 24px;
+        text-align: center;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .settings {
+        margin-top: 15px;
+        padding: 12px;
+        background-color: var(--light-color);
+        border-radius: 8px;
+        font-size: 0.9rem;
+      }
+
+      .translation-panel {
+        margin-top: 15px;
+        padding: 12px;
+        background-color: #e3f2fd;
+        border-radius: 8px;
+      }
+
+      .translation-result {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #e8f5e9;
+        border-radius: 8px;
+        min-height: 60px;
+        word-break: break-word;
+      }
+
+      select {
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #bdc3c7;
+        width: 100%;
+        margin-top: 8px;
+        font-size: 0.9rem;
+        background-color: white;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      #targetLanguage {
+        margin-top: 10px;
+        margin-left: 0;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 20px;
+        color: #7f8c8d;
+        font-size: 0.8rem;
+        padding: 10px;
+      }
+
+      .listening-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: var(--success-color);
+        margin-right: 8px;
+        animation: pulse 1.5s infinite;
+      }
+
+      /* Long-range indicator */
+      .long-range-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #673ab7;
+        margin-right: 8px;
+        animation: pulse 0.8s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      /* Offline indicator */
+      .offline-status {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        padding: 5px 10px;
+        background-color: var(--warning-color);
+        color: white;
+        border-radius: 3px;
+        font-size: 12px;
+        z-index: 1000;
+      }
+
+      .audio-controls {
+        margin-top: 15px;
+        padding: 12px;
+        background-color: #f5f5f5;
+        border-radius: 8px;
+      }
+
+      .audio-panel {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      #audioVisualizer {
+        border-radius: 8px;
+        overflow: hidden;
+        width: 100%;
+        height: 80px;
+        background-color: #f0f0f0;
+        margin-top: 10px;
+      }
+
+      /* RTL support for right-to-left languages */
+      .rtl-text {
+        direction: rtl;
+        text-align: right;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      /* Confidence indicator */
+      .confidence-indicator {
+        height: 4px;
+        background-color: #e0e0e0;
+        margin-top: 5px;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .confidence-level {
+        height: 100%;
+        background-color: var(--success-color);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      /* Android-specific optimizations */
+      .android-warning {
+        background-color: #fff3e0;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+        border-left: 4px solid #ffa000;
+      }
+
+      /* Export dialog styles */
+      .export-dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        width: 90%;
+        max-width: 400px;
+      }
+
+      .export-dialog h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+      }
+
+      .export-dialog button {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 12px;
+      }
+
+      .export-dialog button:last-child {
+        margin-bottom: 0;
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      /* Distance controls */
+      .distance-controls {
+        margin-top: 15px;
+        padding: 12px;
+        background-color: #f5f5f5;
+        border-radius: 8px;
+      }
+
+      .distance-slider {
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .distance-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+        font-size: 0.8rem;
+        color: #666;
+      }
+
+      /* Mobile-specific optimizations */
+      @media (min-width: 768px) {
+        .container {
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 25px;
+          min-height: auto;
+        }
+
+        .transcript-container {
+          flex-direction: row;
+        }
+
+        .text-display,
+        .notes-display {
+          min-height: 250px;
+        }
+
+        select {
+          width: auto;
+          margin-top: 0;
+        }
+
+        #targetLanguage {
+          margin-left: 10px;
+          margin-top: 0;
+        }
+
+        button {
+          flex: 0 1 auto;
+        }
+      }
+
+      /* Very small devices */
+      @media (max-width: 360px) {
+        button {
+          padding: 10px 12px;
+          font-size: 0.8rem;
+        }
+      }
+
+      /* Prevent zoom on input focus */
+      @media screen and (-webkit-min-device-pixel-ratio: 0) {
+        select,
+        textarea,
+        input {
+          font-size: 16px;
+        }
+      }
+
+      /* Swipe to delete for notes */
+      .note-item {
+        transition: transform 0.2s;
+      }
+
+      .note-item.swiping {
+        transition: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Advanced Speech to Text</h1>
+
+      <div class="android-warning" id="androidWarning">
+        <strong>Note for Android Users:</strong> For best results, use Chrome
+        browser and an external microphone if possible.
+      </div>
+
+      <div class="status" id="status">
+        <span class="listening-indicator"></span>Auto-listening activated...
+      </div>
+
+      <div class="control-panel">
+        <button id="toggleBtn">Pause Listening</button>
+        <button id="addNoteBtn">Add as Note</button>
+        <button id="clearBtn">Clear All</button>
+        <button id="longRangeToggle">Enable Long-Range Mode</button>
+        <button id="exportBtn">Export Notes</button>
+        <button id="importBtn">Import Notes</button>
+        <button id="googleTranslateBtn">Google Translate</button>
+      </div>
+
+      <div class="transcript-container">
+        <div class="text-display" id="textDisplay" contenteditable="true">
+          Your transcribed text will appear here...
+        </div>
+
+        <div class="notes-display">
+          <h3>Your Notes</h3>
+          <ul class="notes-list" id="notesList"></ul>
+        </div>
+      </div>
+
+      <div class="settings">
+        <label for="languageSelect">Speech Language:</label>
+        <select id="languageSelect">
+          <!-- Enhanced language list with better Android support -->
+          <optgroup label="African Languages">
+            <option value="am-ET">Amharic (አማርኛ)</option>
+            <option value="ti-ET">Tigrinya (ትግርኛ)</option>
+            <option value="om-ET">Oromo (Oromoo)</option>
+            <option value="so-SO">Somali (Soomaali)</option>
+            <option value="ha-NG">Hausa</option>
+            <option value="sw-KE">Swahili</option>
+          </optgroup>
+          <optgroup label="European Languages">
+            <option value="en-US" selected>English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="es-ES">Spanish (Español)</option>
+            <option value="fr-FR">French (Français)</option>
+            <option value="de-DE">German (Deutsch)</option>
+            <option value="it-IT">Italian (Italiano)</option>
+            <option value="pt-BR">Portuguese (Português)</option>
+            <option value="ru-RU">Russian (Русский)</option>
+          </optgroup>
+          <optgroup label="Asian Languages">
+            <option value="ar-SA">Arabic (العربية)</option>
+            <option value="fa-IR">Persian (فارسی)</option>
+            <option value="hi-IN">Hindi (हिन्दी)</option>
+            <option value="bn-IN">Bengali (বাংলা)</option>
+            <option value="pa-IN">Punjabi (ਪੰਜਾਬੀ)</option>
+            <option value="ja-JP">Japanese (日本語)</option>
+            <option value="ko-KR">Korean (한국어)</option>
+            <option value="zh-CN">Chinese (简体中文)</option>
+            <option value="zh-TW">Chinese (繁體中文)</option>
+          </optgroup>
+          <optgroup label="Other Local Languages">
+            <option value="zu-ZA">Zulu</option>
+            <option value="xh-ZA">Xhosa</option>
+            <option value="af-ZA">Afrikaans</option>
+            <option value="ms-MY">Malay</option>
+            <option value="id-ID">Indonesian</option>
+            <option value="th-TH">Thai</option>
+            <option value="vi-VN">Vietnamese</option>
+          </optgroup>
+        </select>
+
+        <div class="confidence-indicator" id="confidenceIndicator">
+          <div class="confidence-level" id="confidenceLevel"></div>
+        </div>
+      </div>
+
+      <!-- Translation Panel -->
+      <div class="translation-panel">
+        <button id="translateBtn">Translate Text</button>
+        <label for="targetLanguage">Target Language:</label>
+        <select id="targetLanguage">
+          <optgroup label="African Languages">
+            <option value="am">Amharic</option>
+            <option value="ti">Tigrinya</option>
+            <option value="om">Oromo</option>
+            <option value="so">Somali</option>
+            <option value="ha">Hausa</option>
+            <option value="sw">Swahili</option>
+          </optgroup>
+          <optgroup label="European Languages">
+            <option value="en" selected>English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="it">Italian</option>
+            <option value="pt">Portuguese</option>
+            <option value="ru">Russian</option>
+          </optgroup>
+          <optgroup label="Asian Languages">
+            <option value="ar">Arabic</option>
+            <option value="fa">Persian</option>
+            <option value="hi">Hindi</option>
+            <option value="bn">Bengali</option>
+            <option value="pa">Punjabi</option>
+            <option value="ja">Japanese</option>
+            <option value="ko">Korean</option>
+            <option value="zh">Chinese (Simplified)</option>
+            <option value="zh-TW">Chinese (Traditional)</option>
+          </optgroup>
+        </select>
+        <div class="translation-result" id="translationResult"></div>
+      </div>
+
+      <div class="audio-controls">
+        <h3>Audio Settings</h3>
+        <div class="audio-panel">
+          <button id="startMicBtn">Start Microphone</button>
+          <button id="stopMicBtn" disabled>Stop Microphone</button>
+          <div style="flex: 1; min-width: 150px">
+            <label for="volumeControl">Volume:</label>
+            <input
+              type="range"
+              id="volumeControl"
+              min="0"
+              max="1"
+              step="0.1"
+              value="0.7"
+              style="width: 100%"
+            />
+          </div>
+        </div>
+
+        <!-- Distance controls -->
+        <div
+          class="distance-controls"
+          id="distanceControls"
+          style="display: none"
+        >
+          <label for="distanceControl">Listening Distance:</label>
+          <input
+            type="range"
+            id="distanceControl"
+            class="distance-slider"
+            min="1"
+            max="15"
+            value="5"
+            step="1"
+          />
+          <div class="distance-labels">
+            <span>1m</span>
+            <span>5m</span>
+            <span>10m</span>
+            <span>15m+</span>
+          </div>
+        </div>
+
+        <label for="audioInputSelect">Microphone Source:</label>
+        <select id="audioInputSelect" style="width: 100%; margin-top: 8px">
+          <option value="default">Default</option>
+        </select>
+        <div id="audioVisualizer"></div>
+      </div>
+    </div>
+    <footer>
+      Note: Speech recognition and translation require internet, but notes work
+      offline.
+    </footer>
+
+    <div id="offlineIndicator" class="offline-status" style="display: none">
+      OFFLINE MODE
+    </div>
+
+    <script>
+      // Language direction mapping.
+      const rtlLanguages = [
+        "ar",
+        "fa",
+        "he",
+        "ur",
+        "ps",
+        "ku",
+        "sd",
+        "dv",
+        "yi",
+        "ha",
+      ];
+
+      // Check online status and update UI.
+      function updateOnlineStatus() {
+        const offlineIndicator = document.getElementById("offlineIndicator");
+        if (navigator.onLine) {
+          offlineIndicator.style.display = "none";
+        } else {
+          offlineIndicator.style.display = "block";
+        }
+      }
+
+      window.addEventListener("online", updateOnlineStatus);
+      window.addEventListener("offline", updateOnlineStatus);
+      updateOnlineStatus();
+
+      // Initialize IndexedDB for offline storage.
+      let db;
+      const DB_NAME = "SpeechNotesDB";
+      const DB_VERSION = 2; // Updated version for new features
+      const STORE_NAME = "notes";
+
+      function initDB() {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+          request.onerror = (event) => {
+            console.error("Database error:", event.target.error);
+            reject("Database error.");
+          };
+
+          request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+              const store = db.createObjectStore(STORE_NAME, {
+                keyPath: "id",
+                autoIncrement: true,
+              });
+              // Create additional indexes for better querying
+              store.createIndex("timestamp", "timestamp", { unique: false });
+              store.createIndex("language", "language", { unique: false });
+            }
+          };
+
+          request.onsuccess = (event) => {
+            db = event.target.result;
+            resolve(db);
+          };
+        });
+      }
+
+      // Save note to IndexedDB.
+      async function saveNoteToDB(text, language) {
+        if (!db) await initDB();
+
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction([STORE_NAME], "readwrite");
+          const store = transaction.objectStore(STORE_NAME);
+
+          const request = store.add({
+            text: text,
+            language: language,
+            timestamp: new Date().toISOString(),
+          });
+
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = (event) => reject(event.target.error);
+        });
+      }
+
+      // Get all notes from IndexedDB.
+      async function getAllNotesFromDB() {
+        if (!db) await initDB();
+
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction([STORE_NAME], "readonly");
+          const store = transaction.objectStore(STORE_NAME);
+          const request = store.getAll();
+
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = (event) => reject(event.target.error);
+        });
+      }
+
+      // Delete note from IndexedDB.
+      async function deleteNoteFromDB(id) {
+        if (!db) await initDB();
+
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction([STORE_NAME], "readwrite");
+          const store = transaction.objectStore(STORE_NAME);
+          const request = store.delete(id);
+
+          request.onsuccess = () => resolve(true);
+          request.onerror = (event) => reject(event.target.error);
+        });
+      }
+
+      // Clear all notes from IndexedDB.
+      async function clearAllNotesFromDB() {
+        if (!db) await initDB();
+
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction([STORE_NAME], "readwrite");
+          const store = transaction.objectStore(STORE_NAME);
+          const request = store.clear();
+
+          request.onsuccess = () => resolve(true);
+          request.onerror = (event) => reject(event.target.error);
+        });
+      }
+
+      // Function to export notes as Word document.
+      async function exportAsDocx(notes) {
+        try {
+          // Load the docx library dynamically.
+          const { default: docx } = await import(
+            "https://cdn.jsdelivr.net/npm/docx@7.8.2/+esm"
+          );
+
+          // Create document structure.
+          const { Document, Paragraph, TextRun, Packer } = docx;
+
+          const doc = new Document({
+            sections: [
+              {
+                properties: {},
+                children: [
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: "Speech to Text Notes Export",
+                        bold: true,
+                        size: 28,
+                      }),
+                    ],
+                  }),
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `Exported on: ${new Date().toLocaleString()}`,
+                        size: 22,
+                        color: "666666",
+                      }),
+                    ],
+                  }),
+                  new Paragraph({ text: "" }), // Empty paragraph for spacing.
+
+                  // Add all notes.
+                  ...notes.flatMap((note) => [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: note.text,
+                          size: 24,
+                          rightToLeft: rtlLanguages.includes(
+                            note.language?.split("-")[0]
+                          ),
+                        }),
+                      ],
+                    }),
+                    new Paragraph({ text: "" }), // Spacing between notes.
+                  ]),
+                ],
+              },
+            ],
+          });
+
+          // Generate the Word document.
+          const blob = await Packer.toBlob(doc);
+
+          // Create download link.
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "speech-notes-export.docx";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error("Error generating Word document:", error);
+          alert("Failed to export as Word document.");
+        }
+      }
+
+      // Function to export notes as TXT file.
+      async function exportAsTxt(notes) {
+        try {
+          const textContent = notes.map((note) => note.text).join("\n\n");
+          const blob = new Blob([textContent], { type: "text/plain" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "speech-notes-export.txt";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error("Error generating TXT file:", error);
+          alert("Failed to export as TXT file.");
+        }
+      }
+
+      // Function to import Word documents.
+      async function importDocxFile(file) {
+        try {
+          // Load the docx and mammoth libraries dynamically.
+          const { default: mammoth } = await import(
+            "https://cdn.jsdelivr.net/npm/mammoth@1.4.0/+esm"
+          );
+
+          const arrayBuffer = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => resolve(event.target.result);
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(file);
+          });
+
+          const result = await mammoth.extractRawText({ arrayBuffer });
+          const text = result.value;
+
+          // Split text into notes (assuming each paragraph is a note).
+          const notes = text
+            .split("\n")
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0)
+            .map((line) => ({ text: line }));
+
+          return notes;
+        } catch (error) {
+          console.error("Error reading Word document:", error);
+          throw new Error("Could not read Word document.");
+        }
+      }
+
+      // Simplified translation function for demo purposes
+      async function translateText(text, targetLang) {
+        // For demo purposes, we'll just return the text with a prefix
+        // showing what would be translated if a real API were connected
+        return `[Translated to ${targetLang}]: ${text}`;
+
+        /* 
+        // To implement real translation functionality:
+        // 1. Sign up for a translation API service (Google Cloud Translation, Microsoft Translator, DeepL)
+        // 2. Get an API key
+        // 3. Replace this mock implementation with actual API calls
+        // 4. Implement proper error handling and authentication
+        
+        try {
+          const response = await fetch('YOUR_TRANSLATION_API_ENDPOINT', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer YOUR_API_KEY'
+            },
+            body: JSON.stringify({
+              text: text,
+              targetLang: targetLang
+            })
+          });
+          
+          if (!response.ok) {
+            throw new Error('Translation API error');
+          }
+          
+          const data = await response.json();
+          return data.translatedText;
+        } catch (error) {
+          console.error('Translation error:', error);
+          return text; // Fallback to original text
+        }
+        */
+      }
+
+      // Enhanced Audio Worklet Processor for Long-Range Listening
+      const audioProcessorWorkletCode = `
+        class AudioProcessor extends AudioWorkletProcessor {
+          static get parameterDescriptors() {
+            return [
+              { name: 'gain', defaultValue: 1, minValue: 1, maxValue: 10 },
+              { name: 'distance', defaultValue: 5, minValue: 1, maxValue: 15 }
+            ];
+          }
+
+          constructor() {
+            super();
+            this.sampleBuffer = new Float32Array(128);
+            this.noiseThreshold = 0.01;
+            this.noiseProfile = new Float32Array(128).fill(0);
+            this.speechBoostEnabled = true;
+          }
+
+          process(inputs, outputs, parameters) {
+            const input = inputs[0];
+            const output = outputs[0];
+            const gain = parameters.gain[0];
+            const distance = parameters.distance[0];
+
+            if (!input || input.length === 0) {
+              return true;
+            }
+
+            const inputChannel = input[0];
+            
+            // Apply distance-based gain compensation
+            let distanceGain = 1;
+            if (distance > 5) {
+              // Exponential gain increase for distances beyond 5 meters
+              distanceGain = Math.pow(1.2, distance - 5);
+            }
+            
+            // Apply overall gain
+            for (let i = 0; i < inputChannel.length; i++) {
+              this.sampleBuffer[i] = inputChannel[i] * gain * distanceGain;
+            }
+
+            // Apply distance-specific processing
+            this.processForDistance(this.sampleBuffer, distance);
+
+            // Output to all channels
+            for (let channel = 0; channel < output.length; ++channel) {
+              output[channel].set(this.sampleBuffer);
+            }
+
+            return true;
+          }
+
+          processForDistance(buffer, distance) {
+            // Different processing based on distance
+            if (distance > 10) {
+              // Aggressive processing for very long distances (10m+)
+              this.applyHighPassFilter(buffer, 300); // Cut low frequencies
+              this.boostSpeechFrequencies(buffer, 1000, 4000); // Boost speech range
+              this.applyDynamicNoiseReduction(buffer, 0.2); // Strong noise reduction
+            } else if (distance > 5) {
+              // Moderate processing for medium distances (5-10m)
+              this.applyHighPassFilter(buffer, 200);
+              this.boostSpeechFrequencies(buffer, 500, 3000);
+              this.applyDynamicNoiseReduction(buffer, 0.1);
+            }
+            // No special processing for short distances (<5m)
+          }
+
+          applyHighPassFilter(buffer, cutoffFreq) {
+            // Simple high-pass filter implementation
+            let rc = 1.0 / (cutoffFreq * 2 * Math.PI);
+            let dt = 1.0 / sampleRate;
+            let alpha = rc / (rc + dt);
+            
+            let prevSample = buffer[0];
+            for (let i = 1; i < buffer.length; i++) {
+              let sample = buffer[i];
+              buffer[i] = alpha * (prevSample + sample - buffer[i-1]);
+              prevSample = sample;
+            }
+          }
+
+          boostSpeechFrequencies(buffer, lowFreq, highFreq) {
+            // Simple frequency booster for speech range
+            const lowBin = Math.floor(lowFreq / (sampleRate / buffer.length));
+            const highBin = Math.floor(highFreq / (sampleRate / buffer.length));
+            
+            for (let i = lowBin; i <= highBin && i < buffer.length; i++) {
+              buffer[i] *= 1.5; // Boost by 50%
+            }
+          }
+
+          applyDynamicNoiseReduction(buffer, aggressiveness) {
+            // Simple noise reduction
+            const threshold = this.noiseThreshold * (1 + aggressiveness);
+            for (let i = 0; i < buffer.length; i++) {
+              if (Math.abs(buffer[i]) < threshold) {
+                buffer[i] *= 0.5; // Reduce noise
+              }
+            }
+          }
+        }
+        
+        registerProcessor('audio-processor', AudioProcessor);
+      `;
+
+      // Function to apply text direction based on language.
+      function applyTextDirection(element, languageCode) {
+        const baseLang = languageCode.split("-")[0];
+        if (rtlLanguages.includes(baseLang)) {
+          element.classList.add("rtl-text");
+        } else {
+          element.classList.remove("rtl-text");
+        }
+      }
+
+      // Function to update confidence indicator
+      function updateConfidenceIndicator(confidence) {
+        const confidenceLevel = document.getElementById("confidenceLevel");
+        if (confidenceLevel) {
+          const percentage = Math.round(confidence * 100);
+          confidenceLevel.style.width = `${percentage}%`;
+
+          // Change color based on confidence level
+          if (percentage > 80) {
+            confidenceLevel.style.backgroundColor = "var(--success-color)";
+          } else if (percentage > 50) {
+            confidenceLevel.style.backgroundColor = "var(--warning-color)";
+          } else {
+            confidenceLevel.style.backgroundColor = "var(--danger-color)";
+          }
+        }
+      }
+
+      // Function to detect Android devices
+      function isAndroid() {
+        return /Android/i.test(navigator.userAgent);
+      }
+
+      // Function to detect Chrome browser
+      function isChrome() {
+        return /Chrome/i.test(navigator.userAgent);
+      }
+
+      // Function to check if a language is supported on the device
+      async function checkLanguageSupport(languageCode) {
+        if (!("webkitSpeechRecognition" in window)) {
+          return false;
+        }
+
+        // Create a temporary recognition instance to check support
+        const tempRecognition = new (window.SpeechRecognition ||
+          window.webkitSpeechRecognition)();
+        tempRecognition.lang = languageCode;
+
+        return new Promise((resolve) => {
+          tempRecognition.onerror = (event) => {
+            resolve(event.error !== "language-not-supported");
+          };
+
+          tempRecognition.onstart = () => {
+            tempRecognition.stop();
+            resolve(true);
+          };
+
+          tempRecognition.start();
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", async function () {
+        const textDisplay = document.getElementById("textDisplay");
+        const notesList = document.getElementById("notesList");
+        const toggleBtn = document.getElementById("toggleBtn");
+        const addNoteBtn = document.getElementById("addNoteBtn");
+        const clearBtn = document.getElementById("clearBtn");
+        const exportBtn = document.getElementById("exportBtn");
+        const importBtn = document.getElementById("importBtn");
+        const googleTranslateBtn =
+          document.getElementById("googleTranslateBtn");
+        const longRangeToggle = document.getElementById("longRangeToggle");
+        const distanceControl = document.getElementById("distanceControl");
+        const distanceControls = document.getElementById("distanceControls");
+        const status = document.getElementById("status");
+        const languageSelect = document.getElementById("languageSelect");
+        const translateBtn = document.getElementById("translateBtn");
+        const targetLanguage = document.getElementById("targetLanguage");
+        const translationResult = document.getElementById("translationResult");
+        const startMicBtn = document.getElementById("startMicBtn");
+        const stopMicBtn = document.getElementById("stopMicBtn");
+        const volumeControl = document.getElementById("volumeControl");
+        const audioVisualizer = document.getElementById("audioVisualizer");
+        const androidWarning = document.getElementById("androidWarning");
+        const audioInputSelect = document.getElementById("audioInputSelect");
+
+        // Show Android-specific instructions
+        if (isAndroid()) {
+          androidWarning.style.display = "block";
+          if (!isChrome()) {
+            androidWarning.innerHTML +=
+              "<br><br><strong>Recommendation:</strong> For best local language support, please use Google Chrome browser.";
+          }
+        } else {
+          androidWarning.style.display = "none";
+        }
+
+        // Initialize database.
+        try {
+          await initDB();
+          // Load existing notes.
+          const notes = await getAllNotesFromDB();
+          notes.forEach((note) => {
+            addNoteToUI(note.text, note.id, note.language);
+          });
+        } catch (error) {
+          console.error("Failed to initialize database:", error);
+        }
+
+        let recognition;
+        let isListening = false;
+        let isAutoListening = true;
+        let finalTranscript = "";
+        let lastFinalTranscript = "";
+        let audioContext;
+        let microphone;
+        let analyser;
+        let gainNode;
+        let workletNode;
+        let isMicActive = false;
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob;
+        let audioUrl;
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let lastConfidence = 0;
+        let isLongRangeMode = false;
+        let currentDistance = 5; // Default to 5 meters
+
+        // Check for browser support.
+        if (
+          !("webkitSpeechRecognition" in window) &&
+          !("SpeechRecognition" in window)
+        ) {
+          status.innerHTML =
+            '<span style="color:red;">Speech recognition not supported in your browser. Try Chrome or Edge.</span>';
+          toggleBtn.disabled = true;
+          addNoteBtn.disabled = true;
+          return;
+        }
+
+        // Enhanced Recognition Initialization with Long-Range Support
+        function initRecognition() {
+          const SpeechRecognition =
+            window.SpeechRecognition || window.webkitSpeechRecognition;
+          recognition = new SpeechRecognition();
+
+          recognition.continuous = true;
+          recognition.interimResults = true;
+
+          // Adjust settings based on long-range mode
+          if (isLongRangeMode) {
+            recognition.maxAlternatives = 5; // More alternatives for better accuracy
+            recognition.interimResults = true;
+            recognition.continuous = true;
+          } else {
+            recognition.maxAlternatives = 3;
+          }
+
+          if (audioContext) {
+            recognition.audioContext = audioContext;
+          }
+
+          // Set up recognition event handlers
+          recognition.onresult = function (event) {
+            const currentTime = Date.now();
+            let interimTranscript = "";
+            let finalTranscriptPart = "";
+            let highestConfidence = 0;
+
+            // Process all new results since last result.
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              const result = event.results[i];
+              const alternatives = Array.from(result);
+
+              // Enhanced alternative selection for long-range
+              const bestAlternative = alternatives.reduce((best, current) => {
+                if (isLongRangeMode) {
+                  // Apply confidence boost for speech frequencies in long-range mode
+                  const isSpeechLike = this.isSpeechLikeAlternative(
+                    current.transcript
+                  );
+                  const confidenceBoost = isSpeechLike ? 1.2 : 0.8;
+                  const adjustedConfidence =
+                    current.confidence * confidenceBoost;
+
+                  return !best || adjustedConfidence > best.confidence
+                    ? { ...current, confidence: adjustedConfidence }
+                    : best;
+                } else {
+                  return !best || current.confidence > best.confidence
+                    ? current
+                    : best;
+                }
+              }, null);
+
+              if (bestAlternative) {
+                const transcript = bestAlternative.transcript;
+                const confidence = bestAlternative.confidence || 0;
+
+                // Track highest confidence for this batch
+                if (confidence > highestConfidence) {
+                  highestConfidence = confidence;
+                }
+
+                if (result.isFinal) {
+                  // Only add to final transcript if it's new content and not already included
+                  if (
+                    !finalTranscript.includes(transcript) &&
+                    !lastFinalTranscript.includes(transcript)
+                  ) {
+                    // Apply distance-based post-processing
+                    const processedTranscript = isLongRangeMode
+                      ? this.postProcessDistantSpeech(
+                          transcript,
+                          currentDistance
+                        )
+                      : transcript;
+
+                    finalTranscript += processedTranscript + " ";
+                    finalTranscriptPart += processedTranscript + " ";
+                    lastFinalTranscript = finalTranscript; // Update last final transcript
+                  }
+                } else {
+                  interimTranscript += transcript;
+                }
+              }
+            }
+
+            // Update confidence indicator
+            if (highestConfidence > 0) {
+              lastConfidence = highestConfidence;
+              updateConfidenceIndicator(highestConfidence);
+            }
+
+            // Update the display with both final and interim results
+            updateTextDisplay(finalTranscript, interimTranscript);
+          };
+
+          recognition.onend = function () {
+            if (isAutoListening) {
+              setTimeout(() => {
+                try {
+                  recognition.start();
+                } catch (e) {
+                  console.log("Auto-restart failed, retrying...", e);
+                  setTimeout(() => {
+                    if (isAutoListening) recognition.start();
+                  }, 200); // Slightly longer delay on retry.
+                }
+              }, 50); // Very short delay for restart
+            }
+          };
+
+          recognition.onstart = function () {
+            isListening = true;
+            status.innerHTML =
+              '<span class="listening-indicator"></span>Listening... Speak now!' +
+              (isLongRangeMode
+                ? ' <span class="long-range-indicator"></span>(Long-Range Mode)'
+                : "");
+            status.style.backgroundColor = "#e8f5e9";
+            toggleBtn.textContent = "Pause Listening";
+
+            // Reset confidence indicator
+            updateConfidenceIndicator(0);
+
+            // Reset transcripts when starting fresh
+            if (
+              textDisplay.textContent.trim() === "" ||
+              textDisplay.textContent.trim() ===
+                "Your transcribed text will appear here..."
+            ) {
+              finalTranscript = "";
+              lastFinalTranscript = "";
+            }
+          };
+
+          recognition.onerror = function (event) {
+            console.error("Recognition error:", event.error);
+            isListening = false;
+
+            let errorMessage = "Error occurred.";
+            switch (event.error) {
+              case "no-speech":
+                errorMessage = "No speech detected.";
+                break;
+              case "audio-capture":
+                errorMessage = "Microphone not available.";
+                break;
+              case "not-allowed":
+                errorMessage = "Microphone access denied.";
+                break;
+              case "service-not-allowed":
+                errorMessage = "Speech recognition service not allowed.";
+                break;
+              case "network":
+                errorMessage = "Network error occurred.";
+                break;
+              case "language-not-supported":
+                errorMessage =
+                  "Selected language not supported on this device.";
+                // Try to switch to a supported language
+                if (isAndroid()) {
+                  const fallbackLang = "en-US";
+                  languageSelect.value = fallbackLang;
+                  recognition.lang = fallbackLang;
+                  errorMessage += ` Switched to ${fallbackLang} as fallback.`;
+                }
+                break;
+              default:
+                errorMessage = `Error: ${event.error}`;
+            }
+
+            status.innerHTML = `<span style="color:red;">${errorMessage}</span>`;
+            status.style.backgroundColor = "#ffebee";
+            toggleBtn.textContent = "Start Listening";
+
+            // Reset confidence indicator on error
+            updateConfidenceIndicator(0);
+
+            // Different delay strategies based on error type
+            let retryDelay = 500; // Default delay
+
+            if (event.error === "no-speech") {
+              retryDelay = 1000; // Longer delay for no speech
+            } else if (event.error === "network") {
+              retryDelay = 2000; // Even longer for network issues
+            } else if (event.error === "language-not-supported") {
+              retryDelay = 1500; // Medium delay for language issues
+            }
+
+            setTimeout(() => {
+              if (isAutoListening) recognition.start();
+            }, retryDelay);
+          };
+
+          // Add new method for long-range speech processing
+          recognition.isSpeechLikeAlternative = function (transcript) {
+            // Simple heuristic to identify speech-like content
+            const words = transcript.trim().split(/\s+/);
+            if (words.length < 2) return false;
+
+            const avgWordLength =
+              words.reduce((sum, word) => sum + word.length, 0) / words.length;
+            return avgWordLength > 3 && avgWordLength < 10;
+          };
+
+          recognition.postProcessDistantSpeech = function (
+            transcript,
+            distance
+          ) {
+            // Apply corrections for common long-distance recognition errors
+            let processed = transcript;
+
+            // Only apply heavy processing for distances > 5m
+            if (distance > 5) {
+              // Common fixes for distant speech recognition
+              const commonCorrections = {
+                " a ": " I ",
+                " to ": " two ",
+                " for ": " four ",
+                " be ": " we ",
+                " he ": " we ",
+                " are ": " our ",
+              };
+
+              for (const [error, correction] of Object.entries(
+                commonCorrections
+              )) {
+                processed = processed.replace(
+                  new RegExp(error, "gi"),
+                  correction
+                );
+              }
+
+              // Capitalize first letter of sentences
+              processed = processed.replace(/(^\s*\w|\.\s*\w)/g, (match) =>
+                match.toUpperCase()
+              );
+            }
+
+            return processed;
+          };
+        }
+
+        // Efficient UI update function.
+        function updateTextDisplay(final, interim) {
+          // Use requestAnimationFrame for smoother UI updates.
+          requestAnimationFrame(() => {
+            // Only update if there's new content to prevent flickering
+            if (final || interim) {
+              textDisplay.innerHTML =
+                final +
+                (interim
+                  ? '<span style="color:#aaa;">' + interim + "</span>"
+                  : "");
+            }
+          });
+        }
+
+        // Set initial language based on device
+        async function setInitialLanguage() {
+          const userLang = navigator.language || "en-US";
+          const availableLangs = Array.from(languageSelect.options).map(
+            (opt) => opt.value
+          );
+
+          // Check which languages are actually supported
+          const supportedLangs = [];
+          for (const lang of availableLangs) {
+            const isSupported = await checkLanguageSupport(lang);
+            if (isSupported) {
+              supportedLangs.push(lang);
+            }
+          }
+
+          // Try to set the best matching language
+          let selectedLang = "en-US"; // Default fallback
+
+          if (supportedLangs.includes(userLang)) {
+            selectedLang = userLang;
+          } else {
+            // Try to find a matching base language
+            const baseLang = userLang.split("-")[0];
+            const matchingLang = supportedLangs.find((lang) =>
+              lang.startsWith(baseLang)
+            );
+            if (matchingLang) {
+              selectedLang = matchingLang;
+            } else if (supportedLangs.length > 0) {
+              // Fallback to first supported language
+              selectedLang = supportedLangs[0];
+            }
+          }
+
+          languageSelect.value = selectedLang;
+          if (recognition) {
+            recognition.lang = selectedLang;
+          }
+          applyTextDirection(textDisplay, selectedLang);
+
+          // Update the language dropdown to show supported languages
+          Array.from(languageSelect.options).forEach((option) => {
+            option.disabled = !supportedLangs.includes(option.value);
+          });
+        }
+
+        // Initialize recognition
+        initRecognition();
+        await setInitialLanguage();
+
+        // Start listening with faster initialization.
+        if (navigator.onLine) {
+          setTimeout(() => {
+            try {
+              recognition.start();
+            } catch (e) {
+              console.log("Initial start failed, retrying...", e);
+              setTimeout(() => {
+                try {
+                  recognition.start();
+                } catch (e2) {
+                  console.log("Second attempt failed:", e2);
+                  status.innerHTML =
+                    '<span style="color:red;">Microphone error. Refresh and allow access.</span>';
+                }
+              }, 300); // Faster retry.
+            }
+          }, 100); // Shorter initial delay.
+        }
+
+        // Populate audio input devices dropdown
+        async function updateAudioInputs() {
+          try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const audioInputs = devices.filter(
+              (device) => device.kind === "audioinput"
+            );
+
+            // Clear existing options except default
+            while (audioInputSelect.options.length > 1) {
+              audioInputSelect.remove(1);
+            }
+
+            // Add new options
+            audioInputs.forEach((device) => {
+              const option = document.createElement("option");
+              option.value = device.deviceId;
+              option.text =
+                device.label || `Microphone ${audioInputSelect.options.length}`;
+              audioInputSelect.appendChild(option);
+            });
+          } catch (err) {
+            console.error("Error enumerating devices:", err);
+          }
+        }
+
+        // Call initially and whenever devices might change
+        updateAudioInputs();
+        navigator.mediaDevices.addEventListener(
+          "devicechange",
+          updateAudioInputs
+        );
+
+        // Initialize audio context.
+        function initAudioContext() {
+          try {
+            audioContext = new (window.AudioContext ||
+              window.webkitAudioContext)();
+            console.log("Audio context created.");
+            return true;
+          } catch (e) {
+            console.error("Web Audio API not supported.", e);
+            status.innerHTML =
+              '<span style="color:red;">Web Audio API not supported in your browser.</span>';
+            return false;
+          }
+        }
+
+        // Enhanced Microphone Start with Long-Range Support
+        startMicBtn.addEventListener("click", async function () {
+          try {
+            if (isMicActive) {
+              if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+              }
+              if (microphone) microphone.disconnect();
+              if (workletNode) workletNode.disconnect();
+            }
+
+            if (!audioContext && !initAudioContext()) {
+              return;
+            }
+
+            const deviceId =
+              audioInputSelect.value === "default"
+                ? undefined
+                : audioInputSelect.value;
+
+            // Enhanced audio constraints for long-range
+            const constraints = {
+              audio: {
+                deviceId: deviceId,
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: isLongRangeMode ? false : true, // Disable AGC in long-range mode
+                channelCount: 1,
+                sampleRate: 44100,
+                sampleSize: 16,
+                latency: isLongRangeMode ? 0.1 : 0,
+              },
+              video: false,
+            };
+
+            const stream = await navigator.mediaDevices.getUserMedia(
+              constraints
+            );
+
+            gainNode = audioContext.createGain();
+            gainNode.gain.value = volumeControl.value;
+
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+
+            microphone = audioContext.createMediaStreamSource(stream);
+
+            if (audioContext.createAudioWorklet) {
+              try {
+                const blob = new Blob([audioProcessorWorkletCode], {
+                  type: "application/javascript",
+                });
+                const url = URL.createObjectURL(blob);
+
+                await audioContext.audioWorklet.addModule(url);
+                workletNode = new AudioWorkletNode(
+                  audioContext,
+                  "audio-processor"
+                );
+
+                // Set initial parameters
+                workletNode.parameters.get("gain").value = parseFloat(
+                  volumeControl.value
+                );
+                workletNode.parameters.get("distance").value = currentDistance;
+
+                microphone.connect(workletNode);
+                workletNode.connect(analyser);
+                analyser.connect(audioContext.destination);
+              } catch (e) {
+                console.warn(
+                  "AudioWorklet not available, using script processor"
+                );
+                const scriptNode = audioContext.createScriptProcessor(
+                  4096,
+                  1,
+                  1
+                );
+                microphone.connect(scriptNode);
+                scriptNode.connect(analyser);
+                analyser.connect(audioContext.destination);
+              }
+            } else {
+              microphone.connect(gainNode);
+              gainNode.connect(analyser);
+              analyser.connect(audioContext.destination);
+            }
+
+            setupVisualizer();
+
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = function (e) {
+              if (e.data.size > 0) {
+                audioChunks.push(e.data);
+              }
+            };
+
+            mediaRecorder.onstop = function () {
+              audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+              audioUrl = URL.createObjectURL(audioBlob);
+            };
+
+            mediaRecorder.start(100);
+            isMicActive = true;
+
+            startMicBtn.disabled = true;
+            stopMicBtn.disabled = false;
+            status.innerHTML =
+              '<span class="listening-indicator"></span>Microphone active - recording audio.' +
+              (isLongRangeMode
+                ? ' <span class="long-range-indicator"></span>(Long-Range Mode)'
+                : "");
+          } catch (error) {
+            console.error("Microphone error:", error);
+            let errorMsg = error.message;
+
+            if (error.name === "NotAllowedError") {
+              errorMsg = "Microphone access denied. Please check permissions.";
+            } else if (error.name === "NotFoundError") {
+              errorMsg = "No microphone found. Please check your connection.";
+            } else if (error.name === "NotReadableError") {
+              errorMsg = "Microphone is already in use or not readable.";
+            }
+
+            status.innerHTML = `<span style="color:red;">${errorMsg}</span>`;
+          }
+        });
+
+        // Stop microphone properly.
+        stopMicBtn.addEventListener("click", function () {
+          if (!isMicActive) return;
+
+          try {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+              mediaRecorder.stop();
+            }
+
+            // Disconnect all nodes.
+            if (microphone) microphone.disconnect();
+            if (gainNode) gainNode.disconnect();
+            if (analyser) analyser.disconnect();
+            if (workletNode) workletNode.disconnect();
+
+            isMicActive = false;
+            startMicBtn.disabled = false;
+            stopMicBtn.disabled = true;
+            status.innerHTML = "Microphone stopped.";
+          } catch (err) {
+            console.error("Error stopping microphone:", err);
+          }
+        });
+
+        // Volume control.
+        volumeControl.addEventListener("input", function () {
+          if (gainNode) {
+            gainNode.gain.value = this.value;
+          }
+          if (workletNode) {
+            workletNode.parameters.get("gain").value = parseFloat(this.value);
+          }
+        });
+
+        // Distance control.
+        distanceControl.addEventListener("input", function () {
+          currentDistance = parseInt(this.value);
+          if (workletNode) {
+            workletNode.parameters.get("distance").value = currentDistance;
+          }
+        });
+
+        // Long-range mode toggle
+        longRangeToggle.addEventListener("click", function () {
+          isLongRangeMode = !isLongRangeMode;
+
+          if (isLongRangeMode) {
+            this.textContent = "Disable Long-Range Mode";
+            this.style.backgroundColor = "#4caf50";
+            distanceControls.style.display = "block";
+            status.innerHTML =
+              '<span class="listening-indicator"></span>Long-range mode activated. ' +
+              '<span class="long-range-indicator"></span>Use external microphone for best results.';
+          } else {
+            this.textContent = "Enable Long-Range Mode";
+            this.style.backgroundColor = "#673ab7";
+            distanceControls.style.display = "none";
+            status.innerHTML =
+              '<span class="listening-indicator"></span>Standard listening mode activated.';
+          }
+
+          // Reinitialize recognition with new settings
+          if (isListening) {
+            recognition.stop();
+            initRecognition();
+            setTimeout(() => recognition.start(), 200);
+          } else {
+            initRecognition();
+          }
+        });
+
+        // Visualizer with proper animation frame handling.
+        function setupVisualizer() {
+          const canvas = document.createElement("canvas");
+          canvas.width = audioVisualizer.offsetWidth;
+          canvas.height = audioVisualizer.offsetHeight;
+          audioVisualizer.innerHTML = "";
+          audioVisualizer.appendChild(canvas);
+
+          const canvasCtx = canvas.getContext("2d");
+          const bufferLength = analyser.frequencyBinCount;
+          const dataArray = new Uint8Array(bufferLength);
+          let animationId;
+
+          function draw() {
+            if (!isMicActive) {
+              cancelAnimationFrame(animationId);
+              return;
+            }
+
+            animationId = requestAnimationFrame(draw);
+            analyser.getByteFrequencyData(dataArray);
+
+            canvasCtx.fillStyle = "rgb(200, 200, 200)";
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const barWidth = (canvas.width / bufferLength) * 2.5;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+              const barHeight = dataArray[i] / 2;
+              const hue = (i / bufferLength) * 360;
+
+              canvasCtx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+              canvasCtx.fillRect(
+                x,
+                canvas.height - barHeight,
+                barWidth,
+                barHeight
+              );
+
+              x += barWidth + 1;
+            }
+          }
+
+          draw();
+        }
+
+        // Handle window resize.
+        window.addEventListener("resize", function () {
+          if (isMicActive) {
+            setupVisualizer();
+          }
+        });
+
+        // Button event listeners.
+        toggleBtn.addEventListener("click", function () {
+          this.disabled = true;
+
+          if (isListening) {
+            // Pause listening.
+            isAutoListening = false;
+            try {
+              recognition.stop();
+            } catch (e) {
+              console.log("Error stopping recognition:", e);
+            }
+            isListening = false;
+            toggleBtn.textContent = "Start Listening";
+            status.textContent = "Listening paused.";
+            status.style.backgroundColor = "#fff3e0";
+          } else {
+            // Start listening.
+            isAutoListening = true;
+            recognition.lang = languageSelect.value;
+            try {
+              recognition.start();
+            } catch (e) {
+              console.log("Error starting recognition:", e);
+              status.innerHTML =
+                '<span style="color:red;">Error starting microphone. Please refresh and allow permissions.</span>';
+              setTimeout(() => {
+                if (isAutoListening) recognition.start();
+              }, 300); // Faster retry.
+            }
+          }
+
+          setTimeout(() => {
+            this.disabled = false;
+          }, 300); // Faster re-enable.
+        });
+
+        addNoteBtn.addEventListener("click", async function () {
+          if (
+            textDisplay.textContent.trim() &&
+            textDisplay.textContent.trim() !==
+              "Your transcribed text will appear here..."
+          ) {
+            const noteText = textDisplay.textContent.trim();
+            const currentLanguage = languageSelect.value;
+            try {
+              const noteId = await saveNoteToDB(noteText, currentLanguage);
+              addNoteToUI(noteText, noteId, currentLanguage);
+              textDisplay.textContent = "";
+              finalTranscript = "";
+              lastFinalTranscript = ""; // Reset after adding note
+            } catch (error) {
+              console.error("Failed to save note:", error);
+              // Fallback to localStorage if IndexedDB fails.
+              addNoteToUI(noteText, null, currentLanguage);
+              textDisplay.textContent = "";
+              finalTranscript = "";
+              lastFinalTranscript = ""; // Reset after adding note
+            }
+          }
+        });
+
+        clearBtn.addEventListener("click", async function () {
+          if (confirm("Are you sure you want to clear all notes?")) {
+            textDisplay.textContent = "";
+            notesList.innerHTML = "";
+            finalTranscript = "";
+            lastFinalTranscript = ""; // Reset when clearing
+            try {
+              await clearAllNotesFromDB();
+            } catch (error) {
+              console.error("Failed to clear notes:", error);
+            }
+          }
+        });
+
+        // Updated export button with dialog
+        exportBtn.addEventListener("click", async function () {
+          try {
+            const notes = await getAllNotesFromDB();
+            if (notes.length === 0) {
+              alert("No notes to export.");
+              return;
+            }
+
+            // Create export dialog
+            const exportDialog = document.createElement("div");
+            exportDialog.className = "export-dialog";
+            exportDialog.innerHTML = `
+                    <h3>Export Options</h3>
+                    <button id="exportDocx">Export as Word Document (.docx)</button>
+                    <button id="exportTxt">Export as Text File (.txt)</button>
+                    <button id="exportCancel">Cancel</button>
+                `;
+
+            document.body.appendChild(exportDialog);
+
+            // Add event listeners to dialog buttons
+            document
+              .getElementById("exportDocx")
+              .addEventListener("click", async function () {
+                await exportAsDocx(notes);
+                document.body.removeChild(exportDialog);
+              });
+
+            document
+              .getElementById("exportTxt")
+              .addEventListener("click", async function () {
+                await exportAsTxt(notes);
+                document.body.removeChild(exportDialog);
+              });
+
+            document
+              .getElementById("exportCancel")
+              .addEventListener("click", function () {
+                document.body.removeChild(exportDialog);
+              });
+          } catch (error) {
+            console.error("Export failed:", error);
+            alert("Failed to export notes.");
+          }
+        });
+
+        importBtn.addEventListener("click", function () {
+          const fileInput = document.createElement("input");
+          fileInput.type = "file";
+          fileInput.accept = ".docx,.txt";
+
+          fileInput.addEventListener("change", async function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function (e) {
+              try {
+                let notes = [];
+
+                if (file.name.endsWith(".docx")) {
+                  // Handle Word document import.
+                  notes = await importDocxFile(file);
+                } else if (file.name.endsWith(".txt")) {
+                  // Handle plain text import.
+                  const text = e.target.result;
+                  notes = text
+                    .split("\n")
+                    .map((line) => line.trim())
+                    .filter((line) => line.length > 0)
+                    .map((line) => ({ text: line }));
+                }
+
+                // Clear existing notes.
+                notesList.innerHTML = "";
+                await clearAllNotesFromDB();
+
+                // Add new notes.
+                for (const note of notes) {
+                  try {
+                    const text = typeof note === "string" ? note : note.text;
+                    const language = note.language || languageSelect.value;
+                    const noteId = await saveNoteToDB(text, language);
+                    addNoteToUI(text, noteId, language);
+                  } catch (error) {
+                    console.error("Failed to import note:", error);
+                    const text = typeof note === "string" ? note : note.text;
+                    addNoteToUI(text, null, languageSelect.value);
+                  }
+                }
+
+                alert(`Successfully imported ${notes.length} notes.`);
+              } catch (error) {
+                console.error("Import failed:", error);
+                alert("Failed to import notes. Invalid file format.");
+              }
+            };
+
+            if (file.name.endsWith(".docx")) {
+              // Read as array buffer for Word documents.
+              reader.readAsArrayBuffer(file);
+            } else {
+              // Read as text for TXT files.
+              reader.readAsText(file);
+            }
+          });
+
+          fileInput.click();
+        });
+
+        // Translation button event listener.
+        translateBtn.addEventListener("click", async function () {
+          if (
+            !textDisplay.textContent.trim() ||
+            textDisplay.textContent.trim() ===
+              "Your transcribed text will appear here..."
+          ) {
+            alert("No text to translate.");
+            return;
+          }
+
+          if (!navigator.onLine) {
+            alert("Translation requires internet connection.");
+            return;
+          }
+
+          try {
+            translateBtn.disabled = true;
+            translateBtn.textContent = "Translating...";
+
+            const textToTranslate = textDisplay.textContent.trim();
+            const targetLang = targetLanguage.value;
+
+            // Use the translation function.
+            const translation = await translateText(
+              textToTranslate,
+              targetLang
+            );
+
+            translationResult.textContent = translation;
+            applyTextDirection(translationResult, targetLang);
+          } catch (error) {
+            console.error("Translation failed:", error);
+            alert("Translation failed. Please try again.");
+          } finally {
+            translateBtn.disabled = false;
+            translateBtn.textContent = "Translate Text";
+          }
+        });
+
+        // Google Translate button event listener
+        googleTranslateBtn.addEventListener("click", function () {
+          if (
+            !textDisplay.textContent.trim() ||
+            textDisplay.textContent.trim() ===
+              "Your transcribed text will appear here..."
+          ) {
+            alert("No text to translate.");
+            return;
+          }
+
+          const textToTranslate = encodeURIComponent(
+            textDisplay.textContent.trim()
+          );
+          const sourceLang = languageSelect.value.split("-")[0];
+          const targetLang = targetLanguage.value;
+
+          // Open Google Translate in a new tab with the selected text and languages
+          window.open(
+            `https://translate.google.com/?sl=${sourceLang}&tl=${targetLang}&text=${textToTranslate}&op=translate`,
+            "_blank"
+          );
+        });
+
+        languageSelect.addEventListener("change", function () {
+          if (recognition) {
+            recognition.lang = this.value;
+            applyTextDirection(textDisplay, this.value);
+            if (isListening) {
+              recognition.stop();
+              setTimeout(() => recognition.start(), 100); // Faster restart.
+            }
+
+            // Update the source language in the translation panel label
+            const sourceLang = this.value.split("-")[0];
+            document.querySelector(
+              '.translation-panel label[for="targetLanguage"]'
+            ).textContent = `Translate from ${sourceLang} to:`;
+          }
+        });
+
+        function addNoteToUI(text, id, language) {
+          const noteItem = document.createElement("li");
+          noteItem.className = "note-item";
+          noteItem.dataset.id = id || Date.now();
+
+          const noteText = document.createElement("span");
+          noteText.textContent = text;
+
+          // Apply text direction based on language.
+          if (language) {
+            const baseLang = language.split("-")[0];
+            if (rtlLanguages.includes(baseLang)) {
+              noteItem.classList.add("rtl-text");
+            }
+          }
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.className = "delete-note";
+          deleteBtn.innerHTML = "×";
+          deleteBtn.addEventListener("click", async function () {
+            noteItem.remove();
+            if (id) {
+              try {
+                await deleteNoteFromDB(id);
+              } catch (error) {
+                console.error("Failed to delete note from DB:", error);
+              }
+            }
+          });
+
+          // Add touch events for mobile with swipe to delete.
+          noteItem.addEventListener(
+            "touchstart",
+            function (e) {
+              touchStartX = e.changedTouches[0].screenX;
+              noteItem.classList.add("swiping");
+            },
+            { passive: true }
+          );
+
+          noteItem.addEventListener(
+            "touchmove",
+            function (e) {
+              touchEndX = e.changedTouches[0].screenX;
+              const diff = touchStartX - touchEndX;
+              if (diff > 30) {
+                // Swipe left.
+                noteItem.style.transform = `translateX(${-diff}px)`;
+                if (diff > 100) {
+                  deleteBtn.style.opacity = "1";
+                }
+              }
+            },
+            { passive: true }
+          );
+
+          noteItem.addEventListener(
+            "touchend",
+            function () {
+              noteItem.classList.remove("swiping");
+              const diff = touchStartX - touchEndX;
+              if (diff > 100) {
+                // Trigger delete.
+                deleteBtn.click();
+              } else {
+                noteItem.style.transform = "";
+              }
+            },
+            { passive: true }
+          );
+
+          noteItem.appendChild(noteText);
+          noteItem.appendChild(deleteBtn);
+          notesList.appendChild(noteItem);
+
+          noteItem.scrollIntoView({ behavior: "smooth" });
+        }
+
+        textDisplay.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addNoteBtn.click();
+          }
+        });
+
+        // Page visibility handling.
+        document.addEventListener("visibilitychange", function () {
+          if (document.visibilityState === "hidden" && isListening) {
+            recognition.stop();
+          } else if (
+            document.visibilityState === "visible" &&
+            isAutoListening
+          ) {
+            setTimeout(() => recognition.start(), 100); // Faster restart.
+          }
+        });
+
+        // Beforeunload handling.
+        window.addEventListener("beforeunload", function (e) {
+          if (isListening) {
+            recognition.stop();
+          }
+        });
+      });
+
+      // Service worker registration.
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("sw.js")
+            .then((registration) => {
+              console.log("ServiceWorker registration successful.");
+            })
+            .catch((err) => {
+              console.log("ServiceWorker registration failed: ", err);
+            });
+        });
+      }
+
+      // Install prompt handling.
+      let deferredPrompt;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        const installBtn = document.createElement("button");
+        installBtn.textContent = "Install App";
+        installBtn.style.position = "fixed";
+        installBtn.style.bottom = "20px";
+        installBtn.style.right = "20px";
+        installBtn.style.zIndex = "1000";
+        installBtn.style.padding = "10px 15px";
+        installBtn.style.backgroundColor = "#4CAF50";
+        installBtn.style.color = "white";
+        installBtn.style.border = "none";
+        installBtn.style.borderRadius = "5px";
+        installBtn.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
+
+        installBtn.addEventListener("click", () => {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === "accepted") {
+              console.log("User accepted install.");
+            }
+            deferredPrompt = null;
+          });
+        });
+
+        document.body.appendChild(installBtn);
+
+        setTimeout(() => {
+          installBtn.style.display = "none";
+        }, 10000);
+      });
+    </script>
+  </body>
+</html>
