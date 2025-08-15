@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Advanced Speech to Text</title>
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#2c3e50" />
@@ -140,7 +143,8 @@
         margin-top: 15px;
       }
 
-      .text-display, .notes-display {
+      .text-display,
+      .notes-display {
         width: 100%;
         min-height: 150px;
         padding: 12px;
@@ -263,9 +267,15 @@
       }
 
       @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.2); }
-        100% { transform: scale(1); }
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(1);
+        }
       }
 
       .offline-status {
@@ -397,7 +407,8 @@
           flex-direction: row;
         }
 
-        .text-display, .notes-display {
+        .text-display,
+        .notes-display {
           min-height: 250px;
         }
 
@@ -424,7 +435,9 @@
       }
 
       @media screen and (-webkit-min-device-pixel-ratio: 0) {
-        select, textarea, input {
+        select,
+        textarea,
+        input {
           font-size: 16px;
         }
       }
@@ -563,13 +576,33 @@
           <button id="stopMicBtn" disabled>Stop Microphone</button>
           <div style="flex: 1; min-width: 150px">
             <label for="volumeControl">Volume:</label>
-            <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="0.7" style="width: 100%" />
+            <input
+              type="range"
+              id="volumeControl"
+              min="0"
+              max="1"
+              step="0.1"
+              value="0.7"
+              style="width: 100%"
+            />
           </div>
         </div>
 
-        <div class="distance-controls" id="distanceControls" style="display: none">
+        <div
+          class="distance-controls"
+          id="distanceControls"
+          style="display: none"
+        >
           <label for="distanceControl">Listening Distance:</label>
-          <input type="range" id="distanceControl" class="distance-slider" min="1" max="15" value="5" step="1" />
+          <input
+            type="range"
+            id="distanceControl"
+            class="distance-slider"
+            min="1"
+            max="15"
+            value="5"
+            step="1"
+          />
           <div class="distance-labels">
             <span>1m</span>
             <span>5m</span>
@@ -586,7 +619,8 @@
       </div>
     </div>
     <footer>
-      Note: Speech recognition and translation require internet, but notes work offline.
+      Note: Speech recognition and translation require internet, but notes work
+      offline.
     </footer>
 
     <div id="offlineIndicator" class="offline-status" style="display: none">
@@ -595,11 +629,22 @@
 
     <script>
       // ========== GLOBAL VARIABLES AND CONSTANTS ==========
-      const rtlLanguages = ["ar", "fa", "he", "ur", "ps", "ku", "sd", "dv", "yi", "ha"];
+      const rtlLanguages = [
+        "ar",
+        "fa",
+        "he",
+        "ur",
+        "ps",
+        "ku",
+        "sd",
+        "dv",
+        "yi",
+        "ha",
+      ];
       const DB_NAME = "SpeechNotesDB";
       const DB_VERSION = 2;
       const STORE_NAME = "notes";
-      
+
       // App state variables
       let db;
       let recognition;
@@ -648,7 +693,7 @@
         androidWarning: document.getElementById("androidWarning"),
         audioInputSelect: document.getElementById("audioInputSelect"),
         confidenceLevel: document.getElementById("confidenceLevel"),
-        offlineIndicator: document.getElementById("offlineIndicator")
+        offlineIndicator: document.getElementById("offlineIndicator"),
       };
 
       // ========== INITIALIZATION ==========
@@ -674,7 +719,7 @@
         initializeAudio();
         initializeRecognition();
         await setInitialLanguage();
-        
+
         // Start listening immediately
         startListening();
 
@@ -729,7 +774,8 @@
       // Initialize audio context
       function initializeAudio() {
         try {
-          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)();
           return true;
         } catch (e) {
           console.error("Web Audio API not supported.", e);
@@ -741,7 +787,10 @@
 
       // Initialize speech recognition
       function initializeRecognition() {
-        if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+        if (
+          !("webkitSpeechRecognition" in window) &&
+          !("SpeechRecognition" in window)
+        ) {
           elements.status.innerHTML =
             '<span style="color:red;">Speech recognition not supported in your browser. Try Chrome or Edge.</span>';
           elements.toggleBtn.disabled = true;
@@ -749,7 +798,8 @@
           return;
         }
 
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechRecognition =
+          window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
 
         recognition.continuous = true;
@@ -767,14 +817,15 @@
         recognition.onerror = handleRecognitionError;
 
         // Add custom methods for long-range processing
-        recognition.isSpeechLikeAlternative = function(transcript) {
+        recognition.isSpeechLikeAlternative = function (transcript) {
           const words = transcript.trim().split(/\s+/);
           if (words.length < 2) return false;
-          const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / words.length;
+          const avgWordLength =
+            words.reduce((sum, word) => sum + word.length, 0) / words.length;
           return avgWordLength > 3 && avgWordLength < 10;
         };
 
-        recognition.postProcessDistantSpeech = function(transcript, distance) {
+        recognition.postProcessDistantSpeech = function (transcript, distance) {
           let processed = transcript;
           if (distance > 5) {
             const commonCorrections = {
@@ -785,10 +836,17 @@
               " he ": " we ",
               " are ": " our ",
             };
-            for (const [error, correction] of Object.entries(commonCorrections)) {
-              processed = processed.replace(new RegExp(error, "gi"), correction);
+            for (const [error, correction] of Object.entries(
+              commonCorrections
+            )) {
+              processed = processed.replace(
+                new RegExp(error, "gi"),
+                correction
+              );
             }
-            processed = processed.replace(/(^\s*\w|\.\s*\w)/g, (match) => match.toUpperCase());
+            processed = processed.replace(/(^\s*\w|\.\s*\w)/g, (match) =>
+              match.toUpperCase()
+            );
           }
           return processed;
         };
@@ -800,9 +858,11 @@
           setTimeout(() => {
             try {
               recognition.start();
-              elements.status.innerHTML = 
+              elements.status.innerHTML =
                 '<span class="listening-indicator"></span>Listening... Speak now!' +
-                (isLongRangeMode ? ' <span class="long-range-indicator"></span>(Long-Range Mode)' : "");
+                (isLongRangeMode
+                  ? ' <span class="long-range-indicator"></span>(Long-Range Mode)'
+                  : "");
             } catch (e) {
               console.log("Initial start failed, retrying...", e);
               setTimeout(() => {
@@ -831,14 +891,18 @@
           const alternatives = Array.from(result);
           const bestAlternative = alternatives.reduce((best, current) => {
             if (isLongRangeMode) {
-              const isSpeechLike = recognition.isSpeechLikeAlternative(current.transcript);
+              const isSpeechLike = recognition.isSpeechLikeAlternative(
+                current.transcript
+              );
               const confidenceBoost = isSpeechLike ? 1.2 : 0.8;
               const adjustedConfidence = current.confidence * confidenceBoost;
               return !best || adjustedConfidence > best.confidence
                 ? { ...current, confidence: adjustedConfidence }
                 : best;
             } else {
-              return !best || current.confidence > best.confidence ? current : best;
+              return !best || current.confidence > best.confidence
+                ? current
+                : best;
             }
           }, null);
 
@@ -851,9 +915,15 @@
             }
 
             if (result.isFinal) {
-              if (!finalTranscript.includes(transcript) && !lastFinalTranscript.includes(transcript)) {
+              if (
+                !finalTranscript.includes(transcript) &&
+                !lastFinalTranscript.includes(transcript)
+              ) {
                 const processedTranscript = isLongRangeMode
-                  ? recognition.postProcessDistantSpeech(transcript, currentDistance)
+                  ? recognition.postProcessDistantSpeech(
+                      transcript,
+                      currentDistance
+                    )
                   : transcript;
                 finalTranscript += processedTranscript + " ";
                 finalTranscriptPart += processedTranscript + " ";
@@ -892,13 +962,18 @@
         isListening = true;
         elements.status.innerHTML =
           '<span class="listening-indicator"></span>Listening... Speak now!' +
-          (isLongRangeMode ? ' <span class="long-range-indicator"></span>(Long-Range Mode)' : "");
+          (isLongRangeMode
+            ? ' <span class="long-range-indicator"></span>(Long-Range Mode)'
+            : "");
         elements.status.style.backgroundColor = "#e8f5e9";
         elements.toggleBtn.textContent = "Pause Listening";
         updateConfidenceIndicator(0);
 
-        if (elements.textDisplay.textContent.trim() === "" || 
-            elements.textDisplay.textContent.trim() === "Your transcribed text will appear here...") {
+        if (
+          elements.textDisplay.textContent.trim() === "" ||
+          elements.textDisplay.textContent.trim() ===
+            "Your transcribed text will appear here..."
+        ) {
           finalTranscript = "";
           lastFinalTranscript = "";
         }
@@ -960,7 +1035,9 @@
           if (final || interim) {
             elements.textDisplay.innerHTML =
               final +
-              (interim ? '<span style="color:#aaa;">' + interim + "</span>" : "");
+              (interim
+                ? '<span style="color:#aaa;">' + interim + "</span>"
+                : "");
           }
         });
       }
@@ -971,11 +1048,14 @@
           elements.confidenceLevel.style.width = `${percentage}%`;
 
           if (percentage > 80) {
-            elements.confidenceLevel.style.backgroundColor = "var(--success-color)";
+            elements.confidenceLevel.style.backgroundColor =
+              "var(--success-color)";
           } else if (percentage > 50) {
-            elements.confidenceLevel.style.backgroundColor = "var(--warning-color)";
+            elements.confidenceLevel.style.backgroundColor =
+              "var(--warning-color)";
           } else {
-            elements.confidenceLevel.style.backgroundColor = "var(--danger-color)";
+            elements.confidenceLevel.style.backgroundColor =
+              "var(--danger-color)";
           }
         }
       }
@@ -1000,7 +1080,8 @@
       async function checkLanguageSupport(languageCode) {
         if (!("webkitSpeechRecognition" in window)) return false;
 
-        const tempRecognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        const tempRecognition = new (window.SpeechRecognition ||
+          window.webkitSpeechRecognition)();
         tempRecognition.lang = languageCode;
 
         return new Promise((resolve) => {
@@ -1017,7 +1098,9 @@
 
       async function setInitialLanguage() {
         const userLang = navigator.language || "en-US";
-        const availableLangs = Array.from(elements.languageSelect.options).map(opt => opt.value);
+        const availableLangs = Array.from(elements.languageSelect.options).map(
+          (opt) => opt.value
+        );
         const supportedLangs = [];
 
         for (const lang of availableLangs) {
@@ -1030,7 +1113,9 @@
           selectedLang = userLang;
         } else {
           const baseLang = userLang.split("-")[0];
-          const matchingLang = supportedLangs.find(lang => lang.startsWith(baseLang));
+          const matchingLang = supportedLangs.find((lang) =>
+            lang.startsWith(baseLang)
+          );
           if (matchingLang) selectedLang = matchingLang;
           else if (supportedLangs.length > 0) selectedLang = supportedLangs[0];
         }
@@ -1115,46 +1200,52 @@
 
       async function exportAsDocx(notes) {
         try {
-          const { default: docx } = await import("https://cdn.jsdelivr.net/npm/docx@7.8.2/+esm");
+          const { default: docx } = await import(
+            "https://cdn.jsdelivr.net/npm/docx@7.8.2/+esm"
+          );
           const { Document, Paragraph, TextRun, Packer } = docx;
 
           const doc = new Document({
-            sections: [{
-              properties: {},
-              children: [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "Speech to Text Notes Export",
-                      bold: true,
-                      size: 28,
-                    }),
-                  ],
-                }),
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: `Exported on: ${new Date().toLocaleString()}`,
-                      size: 22,
-                      color: "666666",
-                    }),
-                  ],
-                }),
-                new Paragraph({ text: "" }),
-                ...notes.flatMap((note) => [
+            sections: [
+              {
+                properties: {},
+                children: [
                   new Paragraph({
                     children: [
                       new TextRun({
-                        text: note.text,
-                        size: 24,
-                        rightToLeft: rtlLanguages.includes(note.language?.split("-")[0]),
+                        text: "Speech to Text Notes Export",
+                        bold: true,
+                        size: 28,
+                      }),
+                    ],
+                  }),
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: `Exported on: ${new Date().toLocaleString()}`,
+                        size: 22,
+                        color: "666666",
                       }),
                     ],
                   }),
                   new Paragraph({ text: "" }),
-                ]),
-              ],
-            }],
+                  ...notes.flatMap((note) => [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: note.text,
+                          size: 24,
+                          rightToLeft: rtlLanguages.includes(
+                            note.language?.split("-")[0]
+                          ),
+                        }),
+                      ],
+                    }),
+                    new Paragraph({ text: "" }),
+                  ]),
+                ],
+              },
+            ],
           });
 
           const blob = await Packer.toBlob(doc);
@@ -1192,7 +1283,9 @@
 
       async function importDocxFile(file) {
         try {
-          const { default: mammoth } = await import("https://cdn.jsdelivr.net/npm/mammoth@1.4.0/+esm");
+          const { default: mammoth } = await import(
+            "https://cdn.jsdelivr.net/npm/mammoth@1.4.0/+esm"
+          );
 
           const arrayBuffer = await new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -1332,7 +1425,7 @@
         const deleteBtn = document.createElement("button");
         deleteBtn.className = "delete-note";
         deleteBtn.innerHTML = "×";
-        deleteBtn.addEventListener("click", async function() {
+        deleteBtn.addEventListener("click", async function () {
           noteItem.remove();
           if (id) {
             try {
@@ -1344,26 +1437,38 @@
         });
 
         // Touch events for swipe to delete
-        noteItem.addEventListener("touchstart", function(e) {
-          touchStartX = e.changedTouches[0].screenX;
-          noteItem.classList.add("swiping");
-        }, { passive: true });
+        noteItem.addEventListener(
+          "touchstart",
+          function (e) {
+            touchStartX = e.changedTouches[0].screenX;
+            noteItem.classList.add("swiping");
+          },
+          { passive: true }
+        );
 
-        noteItem.addEventListener("touchmove", function(e) {
-          touchEndX = e.changedTouches[0].screenX;
-          const diff = touchStartX - touchEndX;
-          if (diff > 30) {
-            noteItem.style.transform = `translateX(${-diff}px)`;
-            if (diff > 100) deleteBtn.style.opacity = "1";
-          }
-        }, { passive: true });
+        noteItem.addEventListener(
+          "touchmove",
+          function (e) {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (diff > 30) {
+              noteItem.style.transform = `translateX(${-diff}px)`;
+              if (diff > 100) deleteBtn.style.opacity = "1";
+            }
+          },
+          { passive: true }
+        );
 
-        noteItem.addEventListener("touchend", function() {
-          noteItem.classList.remove("swiping");
-          const diff = touchStartX - touchEndX;
-          if (diff > 100) deleteBtn.click();
-          else noteItem.style.transform = "";
-        }, { passive: true });
+        noteItem.addEventListener(
+          "touchend",
+          function () {
+            noteItem.classList.remove("swiping");
+            const diff = touchStartX - touchEndX;
+            if (diff > 100) deleteBtn.click();
+            else noteItem.style.transform = "";
+          },
+          { passive: true }
+        );
 
         noteItem.appendChild(noteText);
         noteItem.appendChild(deleteBtn);
@@ -1403,7 +1508,12 @@
             const hue = (i / bufferLength) * 360;
 
             canvasCtx.fillStyle = `hsl(${hue}, 100%, 50%)`;
-            canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+            canvasCtx.fillRect(
+              x,
+              canvas.height - barHeight,
+              barWidth,
+              barHeight
+            );
             x += barWidth + 1;
           }
         }
@@ -1415,7 +1525,7 @@
 
       function setupEventListeners() {
         // Long-range mode toggle
-        elements.longRangeToggle.addEventListener("click", function() {
+        elements.longRangeToggle.addEventListener("click", function () {
           isLongRangeMode = !isLongRangeMode;
 
           if (isLongRangeMode) {
@@ -1459,7 +1569,7 @@
         elements.languageSelect.addEventListener("change", changeLanguage);
 
         // Text display interactions
-        elements.textDisplay.addEventListener("keydown", function(e) {
+        elements.textDisplay.addEventListener("keydown", function (e) {
           if (e.key === "Enter") {
             e.preventDefault();
             elements.addNoteBtn.click();
@@ -1470,31 +1580,37 @@
         elements.audioInputSelect.addEventListener("change", updateAudioInputs);
 
         // Window events
-        window.addEventListener("resize", function() {
+        window.addEventListener("resize", function () {
           if (isMicActive) setupVisualizer();
         });
 
         // Page visibility
-        document.addEventListener("visibilitychange", function() {
+        document.addEventListener("visibilitychange", function () {
           if (document.visibilityState === "hidden" && isListening) {
             recognition.stop();
-          } else if (document.visibilityState === "visible" && isAutoListening) {
+          } else if (
+            document.visibilityState === "visible" &&
+            isAutoListening
+          ) {
             setTimeout(() => recognition.start(), 100);
           }
         });
 
         // Beforeunload
-        window.addEventListener("beforeunload", function() {
+        window.addEventListener("beforeunload", function () {
           if (isListening) recognition.stop();
         });
 
         // Keyboard shortcuts
-        document.addEventListener("keydown", function(e) {
+        document.addEventListener("keydown", function (e) {
           if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
             e.preventDefault();
             elements.addNoteBtn.click();
           }
-          if (e.key === " " && document.activeElement !== elements.textDisplay) {
+          if (
+            e.key === " " &&
+            document.activeElement !== elements.textDisplay
+          ) {
             e.preventDefault();
             elements.toggleBtn.click();
           }
@@ -1502,18 +1618,21 @@
 
         // Speech synthesis for notes
         const synth = window.speechSynthesis;
-        elements.notesList.addEventListener("click", function(e) {
+        elements.notesList.addEventListener("click", function (e) {
           if (e.target.tagName === "SPAN" && synth) {
-            const utterance = new SpeechSynthesisUtterance(e.target.textContent);
+            const utterance = new SpeechSynthesisUtterance(
+              e.target.textContent
+            );
             utterance.lang = elements.languageSelect.value;
             synth.speak(utterance);
           }
         });
 
         // Clipboard copy
-        elements.textDisplay.addEventListener("dblclick", function() {
+        elements.textDisplay.addEventListener("dblclick", function () {
           if (elements.textDisplay.textContent.trim()) {
-            navigator.clipboard.writeText(elements.textDisplay.textContent.trim())
+            navigator.clipboard
+              .writeText(elements.textDisplay.textContent.trim())
               .then(() => {
                 const originalText = elements.status.textContent;
                 elements.status.textContent = "Text copied to clipboard!";
@@ -1528,10 +1647,11 @@
         });
 
         // Auto-scroll for text display
-        const textObserver = new MutationObserver(function(mutations) {
-          mutations.forEach(function(mutation) {
+        const textObserver = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
             if (mutation.addedNodes.length) {
-              elements.textDisplay.scrollTop = elements.textDisplay.scrollHeight;
+              elements.textDisplay.scrollTop =
+                elements.textDisplay.scrollHeight;
             }
           });
         });
@@ -1543,7 +1663,7 @@
 
         // Battery level awareness
         if ("getBattery" in navigator) {
-          navigator.getBattery().then(function(battery) {
+          navigator.getBattery().then(function (battery) {
             function updateBatteryStatus() {
               if (battery.level < 0.2 && !battery.charging) {
                 elements.status.innerHTML +=
@@ -1561,7 +1681,10 @@
           const connection = navigator.connection;
           if (connection) {
             function updateNetworkStatus() {
-              if (connection.effectiveType === "slow-2g" || connection.effectiveType === "2g") {
+              if (
+                connection.effectiveType === "slow-2g" ||
+                connection.effectiveType === "2g"
+              ) {
                 elements.status.innerHTML +=
                   ' <span style="color:orange;">(Slow Network - Recognition may be delayed)</span>';
               }
@@ -1573,11 +1696,13 @@
 
         // Audio context state handling
         if (audioContext) {
-          audioContext.onstatechange = function() {
+          audioContext.onstatechange = function () {
             if (audioContext.state === "suspended") {
               elements.status.innerHTML +=
                 ' <span style="color:orange;">(Audio suspended - tap to resume)</span>';
-              document.addEventListener("click", resumeAudioContext, { once: true });
+              document.addEventListener("click", resumeAudioContext, {
+                once: true,
+              });
             }
           };
         }
@@ -1587,7 +1712,8 @@
         if (audioContext && audioContext.state === "suspended") {
           audioContext.resume().then(() => {
             elements.status.textContent = elements.status.textContent.replace(
-              "(Audio suspended - tap to resume)", ""
+              "(Audio suspended - tap to resume)",
+              ""
             );
           });
         }
@@ -1598,16 +1724,18 @@
       async function startMicrophone() {
         try {
           if (isMicActive) {
-            if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+            if (mediaRecorder && mediaRecorder.state !== "inactive")
+              mediaRecorder.stop();
             if (microphone) microphone.disconnect();
             if (workletNode) workletNode.disconnect();
           }
 
           if (!audioContext && !initializeAudio()) return;
 
-          const deviceId = elements.audioInputSelect.value === "default" 
-            ? undefined 
-            : elements.audioInputSelect.value;
+          const deviceId =
+            elements.audioInputSelect.value === "default"
+              ? undefined
+              : elements.audioInputSelect.value;
 
           const constraints = {
             audio: {
@@ -1635,19 +1763,28 @@
 
           if (audioContext.createAudioWorklet) {
             try {
-              const blob = new Blob([audioProcessorWorkletCode], { type: "application/javascript" });
+              const blob = new Blob([audioProcessorWorkletCode], {
+                type: "application/javascript",
+              });
               const url = URL.createObjectURL(blob);
               await audioContext.audioWorklet.addModule(url);
-              workletNode = new AudioWorkletNode(audioContext, "audio-processor");
+              workletNode = new AudioWorkletNode(
+                audioContext,
+                "audio-processor"
+              );
 
-              workletNode.parameters.get("gain").value = parseFloat(elements.volumeControl.value);
+              workletNode.parameters.get("gain").value = parseFloat(
+                elements.volumeControl.value
+              );
               workletNode.parameters.get("distance").value = currentDistance;
 
               microphone.connect(workletNode);
               workletNode.connect(analyser);
               analyser.connect(audioContext.destination);
             } catch (e) {
-              console.warn("AudioWorklet not available, using script processor");
+              console.warn(
+                "AudioWorklet not available, using script processor"
+              );
               const scriptNode = audioContext.createScriptProcessor(4096, 1, 1);
               microphone.connect(scriptNode);
               scriptNode.connect(analyser);
@@ -1663,10 +1800,10 @@
 
           mediaRecorder = new MediaRecorder(stream);
           audioChunks = [];
-          mediaRecorder.ondataavailable = function(e) {
+          mediaRecorder.ondataavailable = function (e) {
             if (e.data.size > 0) audioChunks.push(e.data);
           };
-          mediaRecorder.onstop = function() {
+          mediaRecorder.onstop = function () {
             audioBlob = new Blob(audioChunks, { type: "audio/wav" });
             audioUrl = URL.createObjectURL(audioBlob);
           };
@@ -1677,7 +1814,9 @@
           elements.stopMicBtn.disabled = false;
           elements.status.innerHTML =
             '<span class="listening-indicator"></span>Microphone active - recording audio.' +
-            (isLongRangeMode ? ' <span class="long-range-indicator"></span>(Long-Range Mode)' : "");
+            (isLongRangeMode
+              ? ' <span class="long-range-indicator"></span>(Long-Range Mode)'
+              : "");
         } catch (error) {
           console.error("Microphone error:", error);
           let errorMsg = error.message;
@@ -1698,7 +1837,8 @@
         if (!isMicActive) return;
 
         try {
-          if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+          if (mediaRecorder && mediaRecorder.state !== "inactive")
+            mediaRecorder.stop();
           if (microphone) microphone.disconnect();
           if (gainNode) gainNode.disconnect();
           if (analyser) analyser.disconnect();
@@ -1715,12 +1855,14 @@
 
       function updateVolume() {
         if (gainNode) gainNode.gain.value = this.value;
-        if (workletNode) workletNode.parameters.get("gain").value = parseFloat(this.value);
+        if (workletNode)
+          workletNode.parameters.get("gain").value = parseFloat(this.value);
       }
 
       function updateDistance() {
         currentDistance = parseInt(this.value);
-        if (workletNode) workletNode.parameters.get("distance").value = currentDistance;
+        if (workletNode)
+          workletNode.parameters.get("distance").value = currentDistance;
       }
 
       function toggleListening() {
@@ -1758,8 +1900,11 @@
       }
 
       async function addNote() {
-        if (elements.textDisplay.textContent.trim() &&
-            elements.textDisplay.textContent.trim() !== "Your transcribed text will appear here...") {
+        if (
+          elements.textDisplay.textContent.trim() &&
+          elements.textDisplay.textContent.trim() !==
+            "Your transcribed text will appear here..."
+        ) {
           const noteText = elements.textDisplay.textContent.trim();
           const currentLanguage = elements.languageSelect.value;
           try {
@@ -1811,19 +1956,25 @@
 
           document.body.appendChild(exportDialog);
 
-          document.getElementById("exportDocx").addEventListener("click", async function() {
-            await exportAsDocx(notes);
-            document.body.removeChild(exportDialog);
-          });
+          document
+            .getElementById("exportDocx")
+            .addEventListener("click", async function () {
+              await exportAsDocx(notes);
+              document.body.removeChild(exportDialog);
+            });
 
-          document.getElementById("exportTxt").addEventListener("click", async function() {
-            await exportAsTxt(notes);
-            document.body.removeChild(exportDialog);
-          });
+          document
+            .getElementById("exportTxt")
+            .addEventListener("click", async function () {
+              await exportAsTxt(notes);
+              document.body.removeChild(exportDialog);
+            });
 
-          document.getElementById("exportCancel").addEventListener("click", function() {
-            document.body.removeChild(exportDialog);
-          });
+          document
+            .getElementById("exportCancel")
+            .addEventListener("click", function () {
+              document.body.removeChild(exportDialog);
+            });
         } catch (error) {
           console.error("Export failed:", error);
           alert("Failed to export notes.");
@@ -1835,12 +1986,12 @@
         fileInput.type = "file";
         fileInput.accept = ".docx,.txt";
 
-        fileInput.addEventListener("change", async function(e) {
+        fileInput.addEventListener("change", async function (e) {
           const file = e.target.files[0];
           if (!file) return;
 
           const reader = new FileReader();
-          reader.onload = async function(e) {
+          reader.onload = async function (e) {
             try {
               let notes = [];
 
@@ -1848,7 +1999,8 @@
                 notes = await importDocxFile(file);
               } else if (file.name.endsWith(".txt")) {
                 const text = e.target.result;
-                notes = text.split("\n")
+                notes = text
+                  .split("\n")
                   .map((line) => line.trim())
                   .filter((line) => line.length > 0)
                   .map((line) => ({ text: line }));
@@ -1860,7 +2012,8 @@
               for (const note of notes) {
                 try {
                   const text = typeof note === "string" ? note : note.text;
-                  const language = note.language || elements.languageSelect.value;
+                  const language =
+                    note.language || elements.languageSelect.value;
                   const noteId = await saveNoteToDB(text, language);
                   addNoteToUI(text, noteId, language);
                 } catch (error) {
@@ -1885,8 +2038,11 @@
       }
 
       async function translateTextHandler() {
-        if (!elements.textDisplay.textContent.trim() ||
-            elements.textDisplay.textContent.trim() === "Your transcribed text will appear here...") {
+        if (
+          !elements.textDisplay.textContent.trim() ||
+          elements.textDisplay.textContent.trim() ===
+            "Your transcribed text will appear here..."
+        ) {
           alert("No text to translate.");
           return;
         }
@@ -1916,13 +2072,18 @@
       }
 
       function googleTranslate() {
-        if (!elements.textDisplay.textContent.trim() ||
-            elements.textDisplay.textContent.trim() === "Your transcribed text will appear here...") {
+        if (
+          !elements.textDisplay.textContent.trim() ||
+          elements.textDisplay.textContent.trim() ===
+            "Your transcribed text will appear here..."
+        ) {
           alert("No text to translate.");
           return;
         }
 
-        const textToTranslate = encodeURIComponent(elements.textDisplay.textContent.trim());
+        const textToTranslate = encodeURIComponent(
+          elements.textDisplay.textContent.trim()
+        );
         const sourceLang = elements.languageSelect.value.split("-")[0];
         const targetLang = elements.targetLanguage.value;
 
@@ -1942,15 +2103,18 @@
           }
 
           const sourceLang = this.value.split("-")[0];
-          document.querySelector('.translation-panel label[for="targetLanguage"]').textContent = 
-            `Translate from ${sourceLang} to:`;
+          document.querySelector(
+            '.translation-panel label[for="targetLanguage"]'
+          ).textContent = `Translate from ${sourceLang} to:`;
         }
       }
 
       async function updateAudioInputs() {
         try {
           const devices = await navigator.mediaDevices.enumerateDevices();
-          const audioInputs = devices.filter(device => device.kind === "audioinput");
+          const audioInputs = devices.filter(
+            (device) => device.kind === "audioinput"
+          );
 
           while (elements.audioInputSelect.options.length > 1) {
             elements.audioInputSelect.remove(1);
@@ -1959,7 +2123,9 @@
           audioInputs.forEach((device) => {
             const option = document.createElement("option");
             option.value = device.deviceId;
-            option.text = device.label || `Microphone ${elements.audioInputSelect.options.length}`;
+            option.text =
+              device.label ||
+              `Microphone ${elements.audioInputSelect.options.length}`;
             elements.audioInputSelect.appendChild(option);
           });
         } catch (err) {
@@ -1969,12 +2135,16 @@
 
       // Initialize audio input devices
       updateAudioInputs();
-      navigator.mediaDevices.addEventListener("devicechange", updateAudioInputs);
+      navigator.mediaDevices.addEventListener(
+        "devicechange",
+        updateAudioInputs
+      );
 
       // Service worker registration
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("sw.js")
+          navigator.serviceWorker
+            .register("sw.js")
             .then((registration) => {
               console.log("ServiceWorker registration successful.");
             })
@@ -2014,7 +2184,9 @@
         });
 
         document.body.appendChild(installBtn);
-        setTimeout(() => { installBtn.style.display = "none"; }, 10000);
+        setTimeout(() => {
+          installBtn.style.display = "none";
+        }, 10000);
       });
     </script>
   </body>
